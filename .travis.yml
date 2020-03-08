@@ -13,7 +13,7 @@ install:
   - pip install poetry
   - poetry install -vvv
 script:
-  - python test_mubu_login.py
+#  - python test_mubu_login.py
   - python -m unittest discover
 #  - python -m httprunner.cli hrun -V
 #  - python -m httprunner.cli hrun -h
