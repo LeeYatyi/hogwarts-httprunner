@@ -12,5 +12,5 @@ class TestMubuLogin(unittest.TestCase):
         resp = requests.get(url, headers=headers, verify=False)
         assert resp.status_code == 200
 
-if __name__ == '__main__':
-    TestMubuLogin().test_get_homepage()
+# if __name__ == '__main__':
+#     TestMubuLogin().test_get_homepage()
