@@ -2,7 +2,10 @@ request:
     url: "https://mubu.com/api/login/submit"
     method: "POST"
     headers:
-        "user - agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
+        user - agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
+        content-type: "application/x-www-form-urlencoded; charset=UTF-8"
     data: "phone=18911773181&password=leeyatyi%40123456&remember=true"
+    verify: False
 validate:
     status_code: 200
+    $.code: 0

@@ -1,5 +1,11 @@
+import jsonpath
 import requests
 from hogwarts_httprunner.loader import load_yaml
+
+
+def extract_json_field(resp, json_field):
+    value = jsonpath.jsonpath(resp.json(), json_field)
+    return value[0]
 
 
 def run_yaml(yaml_file):
@@ -11,10 +17,13 @@ def run_yaml(yaml_file):
     validators = load_json["validate"]
 
     for key in validators:
-        actual_value = getattr(resp, key)      # resp.key
+        if "$" in key:
+            # key = "$.code"
+            actual_value = extract_json_field(resp, key)
+        else:
+            actual_value = getattr(resp, key)      # resp.key
         expected_value = validators[key]
 
         assert actual_value == expected_value
-    return True
 
-    return resp
+    return True

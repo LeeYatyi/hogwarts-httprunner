@@ -18,18 +18,19 @@ class TestSingleAPI(unittest.TestCase):
         self.assertEqual(loaded_json["request"]["url"], "https://mubu.com")
 
     def test_run_single_api(self):
-        single_api_yaml = os.path.join(os.getcwd(), "api", "get_homepage.yml")
+        single_api_yaml = os.path.join(os.path.dirname(__file__), "api", "get_homepage.yml")
         result = run_yaml(single_api_yaml)
         self.assertEqual(result, True)
 
-        single_api_yaml = os.path.join(os.getcwd(), "api", "get_login.yml")
+        single_api_yaml = os.path.join(os.path.dirname(__file__), "api", "get_login.yml")
         result = run_yaml(single_api_yaml)
         self.assertEqual(result, True)
 
-        single_api_yaml = os.path.join(os.getcwd(), "api", "get_login_password.yml")
+        single_api_yaml = os.path.join(os.path.dirname(__file__), "api", "get_login_password.yml")
         result = run_yaml(single_api_yaml)
         self.assertEqual(result, True)
 
-        single_api_yaml = os.path.join(os.getcwd(), "api", "post_submit.yml")
+    def test_run_single_api_with_jsonpath(self):
+        single_api_yaml = os.path.join(os.path.dirname(__file__), "api", "post_submit.yml")
         result = run_yaml(single_api_yaml)
         self.assertEqual(result, True)
