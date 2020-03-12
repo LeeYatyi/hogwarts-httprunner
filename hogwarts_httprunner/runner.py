@@ -1,7 +1,12 @@
 import jsonpath
 import requests
+from requests import sessions
 from hogwarts_httprunner.loader import load_yaml
+import re
 
+session = sessions.Session()
+variables_mapping = {}
+vavriable_regex_compile = re.compile(".*\$(W+)\.*")
 
 def extract_json_field(resp, json_field):
     value = jsonpath.jsonpath(resp.json(), json_field)
@@ -22,6 +27,31 @@ def is_testcases(content):
             return False
     return True
 
+def replace_var(content):
+    matched = vavriable_regex_compile.match(content)
+    if not matched:
+        return content
+    replaced_content = content.replace("")
+    return replaced_content
+
+def parse_content(content):
+    if isinstance(content, dict):
+        parsed_content = {}
+        for key, value in content.items():
+            parsed_value = parse_content(value)
+            parsed_content[key] = parsed_value
+        return parsed_content
+
+    if isinstance(content, list):
+        parsed_content = []
+        for item in content:
+            parsed_item = parse_content(item)
+            parsed_content.append(parsed_item)
+        return parsed_content
+
+    if isinstance(content, str):
+        replace_var(content)
+
 def is_testsuit(content):
     pass
 
@@ -38,7 +68,7 @@ def run_api(api_json):
     requestors = api_json["request"]
     method = requestors.pop("method")
     url = requestors.pop("url")
-    resp = requests.request(method, url, **requestors)
+    resp = session.request(method, url, **requestors)
     validators = api_json["validate"]
 
     for key in validators:
@@ -51,6 +81,11 @@ def run_api(api_json):
 
         assert actual_value == expected_value
 
+    extractor_mapping = api_json.get("extract", {})  #避免无extract情况
+    for var_name in extractor_mapping:
+        var_expr = extractor_mapping[var_name]     # code: $.code
+        var_value = extract_json_field(resp, var_expr)
+        variables_mapping[var_name] = var_value
     return True
 
 
