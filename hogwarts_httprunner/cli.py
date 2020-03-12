@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from hogwarts_httprunner.runner import run_yaml
+from hogwarts_httprunner.runner import runner
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
         parser.print_help()
         return 0
 
-    success = run_yaml(args.yaml_path)
+    success = runner(args.yaml_path)
     return success
 
 
