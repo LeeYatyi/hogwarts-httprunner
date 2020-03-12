@@ -4,13 +4,16 @@ from requests import sessions
 from hogwarts_httprunner.loader import load_yaml
 import re
 
+
 session = sessions.Session()
-variables_mapping = {}
-vavriable_regex_compile = re.compile(".*\$(W+)\.*")
+session_variables_mapping = {}
+vavriable_regex_compile = re.compile(r".*\$(\w+).*")
+
 
 def extract_json_field(resp, json_field):
     value = jsonpath.jsonpath(resp.json(), json_field)
     return value[0]
+
 
 def is_api(content):
     if not isinstance(content, dict):
@@ -18,6 +21,7 @@ def is_api(content):
     if "request" and "validate" not in content:
         return False
     return True
+
 
 def is_testcases(content):
     if not isinstance(content, list):
@@ -27,48 +31,60 @@ def is_testcases(content):
             return False
     return True
 
-def replace_var(content):
+
+def is_testsuite(content):
+    pass
+
+
+def replace_var(content, variables_mapping):
     matched = vavriable_regex_compile.match(content)
     if not matched:
         return content
-    replaced_content = content.replace("")
+    var_name = matched[1]
+    value = variables_mapping[var_name]
+    replaced_content = content.replace("${}".format(var_name), str(value))
     return replaced_content
 
-def parse_content(content):
+
+def parse_content(content, variables_mapping):
     if isinstance(content, dict):
         parsed_content = {}
         for key, value in content.items():
-            parsed_value = parse_content(value)
+            parsed_value = parse_content(value, variables_mapping)
             parsed_content[key] = parsed_value
         return parsed_content
 
-    if isinstance(content, list):
+    elif isinstance(content, list):
         parsed_content = []
         for item in content:
-            parsed_item = parse_content(item)
+            parsed_item = parse_content(item, variables_mapping)
             parsed_content.append(parsed_item)
         return parsed_content
 
-    if isinstance(content, str):
-        replace_var(content)
+    elif isinstance(content, str):
+        return replace_var(content, variables_mapping)
 
-def is_testsuit(content):
-    pass
+    else:
+        return content
 
 
 def run_api(api_json):
     """
-    {
-    "request":{},
-    "validate":{}
-    }
     :param api_json:
+                    {
+                    "request":{},
+                    "validate":{}
+                    }
     :return:
     """
     requestors = api_json["request"]
-    method = requestors.pop("method")
-    url = requestors.pop("url")
-    resp = session.request(method, url, **requestors)
+    global session_variables_mapping
+    parsed_requestors = parse_content(requestors, session_variables_mapping)
+    print("parsed_request------", parsed_requestors)
+
+    method = parsed_requestors.pop("method")
+    url = parsed_requestors.pop("url")
+    resp = session.request(method, url, **parsed_requestors)
     validators = api_json["validate"]
 
     for key in validators:
@@ -81,11 +97,11 @@ def run_api(api_json):
 
         assert actual_value == expected_value
 
-    extractor_mapping = api_json.get("extract", {})  #避免无extract情况
+    extractor_mapping = api_json.get("extract", {})  # 避免无extract情况
     for var_name in extractor_mapping:
         var_expr = extractor_mapping[var_name]     # code: $.code
         var_value = extract_json_field(resp, var_expr)
-        variables_mapping[var_name] = var_value
+        session_variables_mapping[var_name] = var_value
     return True
 
 

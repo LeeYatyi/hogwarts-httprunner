@@ -15,11 +15,11 @@ class TestSingleAPI(unittest.TestCase):
         single_testcase_yaml = os.path.join(os.path.dirname(__file__), "testcases", "mubu_login.yml")
         loaded_json = load_yaml(single_testcase_yaml)
         self.assertIsInstance(loaded_json, list)
-        self.assertEqual(len(loaded_json), 4)
+        self.assertEqual(len(loaded_json), 5)
 
     def test_runner_single_testcase(self):
         single_testcase_yaml = os.path.join(os.path.dirname(__file__), "testcases", "mubu_login.yml")
         result = runner(single_testcase_yaml)
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result), 5)
 
 
